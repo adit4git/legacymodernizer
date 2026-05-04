@@ -1,0 +1,24 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.Master.cs" Inherits="ContosoStore.Web.SiteMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <title>Contoso Store</title>
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <header>
+            <nav>
+                <a href="~/Default.aspx" runat="server">Home</a> |
+                <a href="~/Products.aspx" runat="server">Products</a> |
+                <a href="~/Orders.aspx" runat="server">My Orders</a> |
+                <asp:LoginStatus ID="lsAuth" runat="server" />
+            </nav>
+        </header>
+        <main>
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </main>
+        <footer>&copy; Contoso</footer>
+    </form>
+</body>
+</html>
