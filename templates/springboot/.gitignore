@@ -1,0 +1,32 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### IDE ###
+.idea/
+*.iml
+*.iws
+.classpath
+.project
+.settings/
+.vscode/
+.factorypath
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+logs/
+
+### Local config ###
+.env
+.env.local
+application-local.yml
+application-local.properties
+
+### Build ###
+build/
+out/
+bin/
+dependency-reduced-pom.xml

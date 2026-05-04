@@ -1,0 +1,153 @@
+{
+  "generated_at": "2025-05-04T00:00:00Z",
+  "base_package": "com.example.outputfolder",
+  "base_path": "app/src/main/java/com/example/outputfolder",
+  "threshold": 18,
+  "files": [
+    {
+      "index": 1,
+      "type": "entity",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/domain/Product.java"
+    },
+    {
+      "index": 2,
+      "type": "repository",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/repository/ProductRepository.java"
+    },
+    {
+      "index": 3,
+      "type": "dto-request",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/dto/ProductRequest.java"
+    },
+    {
+      "index": 4,
+      "type": "dto-response",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/dto/ProductResponse.java"
+    },
+    {
+      "index": 5,
+      "type": "mapper",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/mapper/ProductMapper.java"
+    },
+    {
+      "index": 6,
+      "type": "service-interface",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/service/ProductService.java"
+    },
+    {
+      "index": 7,
+      "type": "service-impl",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/service/impl/ProductServiceImpl.java"
+    },
+    {
+      "index": 8,
+      "type": "controller",
+      "controller": "Products",
+      "path": "app/src/main/java/com/example/outputfolder/controller/ProductsController.java"
+    },
+    {
+      "index": 9,
+      "type": "entity",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/domain/Order.java"
+    },
+    {
+      "index": 10,
+      "type": "entity",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/domain/OrderItem.java"
+    },
+    {
+      "index": 11,
+      "type": "entity-enum",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/domain/OrderStatus.java"
+    },
+    {
+      "index": 12,
+      "type": "repository",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/repository/OrderRepository.java"
+    },
+    {
+      "index": 13,
+      "type": "dto-request",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/dto/PlaceOrderRequest.java"
+    },
+    {
+      "index": 14,
+      "type": "dto-response",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/dto/OrderResponse.java"
+    },
+    {
+      "index": 15,
+      "type": "dto-extra",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/dto/OrderItemResponse.java"
+    },
+    {
+      "index": 16,
+      "type": "dto-extra",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/dto/UpdateOrderStatusRequest.java"
+    },
+    {
+      "index": 17,
+      "type": "mapper",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/mapper/OrderMapper.java"
+    },
+    {
+      "index": 18,
+      "type": "service-interface",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/service/OrderService.java"
+    },
+    {
+      "index": 19,
+      "type": "service-impl",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/service/impl/OrderServiceImpl.java"
+    },
+    {
+      "index": 20,
+      "type": "controller",
+      "controller": "Orders",
+      "path": "app/src/main/java/com/example/outputfolder/controller/OrdersController.java"
+    },
+    {
+      "index": 21,
+      "type": "security-config",
+      "controller": "global",
+      "path": "app/src/main/java/com/example/outputfolder/config/SecurityConfig.java"
+    },
+    {
+      "index": 22,
+      "type": "flyway-migration",
+      "controller": "global",
+      "path": "app/src/main/resources/db/migration/V1__init.sql"
+    },
+    {
+      "index": 23,
+      "type": "exception",
+      "controller": "global",
+      "path": "app/src/main/java/com/example/outputfolder/exception/ResourceNotFoundException.java"
+    },
+    {
+      "index": 24,
+      "type": "exception",
+      "controller": "global",
+      "path": "app/src/main/java/com/example/outputfolder/exception/BusinessException.java"
+    }
+  ],
+  "total_planned": 24
+}

@@ -1,0 +1,199 @@
+{
+  "projects": [
+    {
+      "name": "ContosoStore.Api",
+      "path": "ContosoStore.Api/ContosoStore.Api.csproj",
+      "type": "ASP.NET Core Web API",
+      "targetFramework": "net6.0",
+      "packages": [
+        "Microsoft.EntityFrameworkCore.SqlServer",
+        "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "AutoMapper.Extensions.Microsoft.DependencyInjection"
+      ]
+    },
+    {
+      "name": "ContosoStore.Web",
+      "path": "ContosoStore.Web/ContosoStore.Web.csproj",
+      "type": "ASP.NET WebForms",
+      "targetFramework": "net48",
+      "references": [
+        "System.Web",
+        "System.Web.UI"
+      ]
+    }
+  ],
+  "apis": [
+    {
+      "controller": "ProductsController",
+      "path": "ContosoStore.Api/Controllers/ProductsController.cs",
+      "routePrefix": "api/products",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/products",
+          "queryParameters": ["category", "page", "size"],
+          "authorization": "anonymous",
+          "response": "IEnumerable<Product>"
+        },
+        {
+          "method": "GET",
+          "route": "api/products/{id}",
+          "routeParameters": ["id"],
+          "authorization": "anonymous",
+          "response": "Product or 404"
+        },
+        {
+          "method": "POST",
+          "route": "api/products",
+          "body": "Product",
+          "authorization": "Admin,ProductManager",
+          "response": "201 Created with Product"
+        },
+        {
+          "method": "PUT",
+          "route": "api/products/{id}",
+          "routeParameters": ["id"],
+          "body": "Product",
+          "authorization": "Admin,ProductManager",
+          "response": "Updated Product or 404"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/products/{id}",
+          "routeParameters": ["id"],
+          "authorization": "Admin",
+          "response": "204 NoContent or 404"
+        }
+      ]
+    },
+    {
+      "controller": "OrdersController",
+      "path": "ContosoStore.Api/Controllers/OrdersController.cs",
+      "routePrefix": "api/orders",
+      "authorization": "Authenticated",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/orders/{id}",
+          "routeParameters": ["id"],
+          "authorization": "Authenticated",
+          "response": "Order or 404"
+        },
+        {
+          "method": "GET",
+          "route": "api/orders/customer/{email}",
+          "routeParameters": ["email"],
+          "authorization": "Authenticated",
+          "response": "IEnumerable<Order>"
+        },
+        {
+          "method": "POST",
+          "route": "api/orders",
+          "body": "PlaceOrderRequest",
+          "authorization": "Authenticated",
+          "response": "201 Created with Order or 400"
+        },
+        {
+          "method": "PATCH",
+          "route": "api/orders/{id}/status",
+          "routeParameters": ["id"],
+          "body": "OrderStatus",
+          "authorization": "Admin,Fulfilment",
+          "response": "Updated Order or 404"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "name": "ProductService",
+      "path": "ContosoStore.Api/Services/ProductService.cs",
+      "interface": "IProductService",
+      "dependencies": ["StoreDbContext"],
+      "methods": [
+        "ListAsync(string? category, int page, int size)",
+        "GetAsync(int id)",
+        "CreateAsync(Product p)",
+        "UpdateAsync(int id, Product p)",
+        "DeleteAsync(int id)"
+      ]
+    },
+    {
+      "name": "OrderService",
+      "path": "ContosoStore.Api/Services/OrderService.cs",
+      "interface": "IOrderService",
+      "dependencies": ["StoreDbContext"],
+      "methods": [
+        "GetAsync(int id)",
+        "ListForCustomerAsync(string email)",
+        "PlaceAsync(string email, IEnumerable<(int ProductId, int Qty)> lines)",
+        "UpdateStatusAsync(int id, OrderStatus status)"
+      ]
+    }
+  ],
+  "ui": [
+    {
+      "page": "ContosoStore.Web/Login.aspx",
+      "codeBehind": "ContosoStore.Web/Login.aspx.cs",
+      "fields": ["txtEmail", "txtPassword"],
+      "events": ["btnLogin_Click"],
+      "auth": "FormsAuthentication via auth/login API call",
+      "notes": "Stores JWT in FormsAuthenticationTicket.UserData and cookie"
+    },
+    {
+      "page": "ContosoStore.Web/Products.aspx",
+      "codeBehind": "ContosoStore.Web/Products.aspx.cs",
+      "fields": ["ddlCategory", "txtSearch", "gvProducts"],
+      "events": ["ddlCategory_Changed", "btnSearch_Click", "gvProducts_PageIndexChanging", "ProductCommand"],
+      "auth": "Requires authenticated user; uses FormsIdentity ticket user data as Bearer token",
+      "notes": "Calls API products endpoint directly from server-side code"
+    },
+    {
+      "page": "ContosoStore.Web/Site.Master",
+      "path": "ContosoStore.Web/Site.Master",
+      "notes": "Shared layout with navigation, login status, links to Products and My Orders"
+    }
+  ],
+  "data": {
+    "contexts": [
+      {
+        "name": "StoreDbContext",
+        "path": "ContosoStore.Api/Data/StoreDbContext.cs",
+        "dbsets": ["Products", "Orders", "OrderItems"],
+        "provider": "Microsoft SQL Server"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Product",
+        "path": "ContosoStore.Api/Models/Product.cs",
+        "fields": ["Id", "Name", "Description", "Price", "StockQuantity", "Category", "CreatedAt", "UpdatedAt", "IsActive"]
+      },
+      {
+        "name": "Order",
+        "path": "ContosoStore.Api/Models/Order.cs",
+        "fields": ["Id", "CustomerEmail", "PlacedAt", "Status", "TotalAmount", "Items"]
+      },
+      {
+        "name": "OrderItem",
+        "path": "ContosoStore.Api/Models/Order.cs",
+        "fields": ["Id", "OrderId", "ProductId", "Quantity", "UnitPrice"]
+      }
+    ]
+  },
+  "cross_cutting": {
+    "auth": "API uses JWT bearer authentication with symmetric key from appsettings.json; WebForms uses FormsAuthentication and delegates login to auth/login endpoint",
+    "logging": "Default ASP.NET Core logging configuration in appsettings.json; no explicit custom logging observed",
+    "config": "API configuration via appsettings.json; WebForms config via Web.config including ApiBaseUrl and Forms auth settings"
+  },
+  "external_dependencies": [
+    "Microsoft.EntityFrameworkCore.SqlServer",
+    "Microsoft.AspNetCore.Authentication.JwtBearer",
+    "AutoMapper.Extensions.Microsoft.DependencyInjection",
+    "Newtonsoft.Json",
+    "System.Web",
+    "System.Web.UI",
+    "ASP.NET Identity/Forms Authentication",
+    "SQL Server"
+  ]
+}
