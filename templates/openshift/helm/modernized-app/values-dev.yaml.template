@@ -1,0 +1,19 @@
+global:
+  namespace: {{artifactId}}-dev
+
+api:
+  replicaCount: 1
+  image: { tag: dev }
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+  hpa: { enabled: false }
+
+ui:
+  replicaCount: 1
+  image: { tag: dev }
+  hpa: { enabled: false }
+
+route:
+  api: { host: api.dev.{{artifactId}}.example.com }
+  ui:  { host:     dev.{{artifactId}}.example.com }

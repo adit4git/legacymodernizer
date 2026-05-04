@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1.7
+# ---- Build stage ----
+FROM maven:3.9-eclipse-temurin-{{javaVersion}} AS builder
+WORKDIR /workspace
+COPY pom.xml .
+COPY app/pom.xml app/pom.xml
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -pl app -am dependency:go-offline -DskipTests
+COPY app/src app/src
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -pl app -am package -DskipTests \
+ && cp app/target/*.jar app.jar
+
+# ---- Runtime stage (distroless, non-root, OpenShift-friendly) ----
+FROM gcr.io/distroless/java{{javaVersion}}-debian12:nonroot
+WORKDIR /app
+COPY --from=builder /workspace/app.jar app.jar
+EXPOSE 8080
+USER nonroot
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+ENTRYPOINT ["java", "-jar", "app.jar"]

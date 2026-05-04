@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata: { name: npm-build }
+spec:
+  workspaces:
+    - { name: source }
+    - { name: cache }
+  steps:
+    - name: build
+      image: node:20-alpine
+      workingDir: $(workspaces.source.path)/ui
+      env:
+        - { name: npm_config_cache, value: $(workspaces.cache.path)/.npm }
+      script: |
+        #!/usr/bin/env sh
+        set -e
+        npm ci
+        npm run lint
+        npm run test
+        npm run build

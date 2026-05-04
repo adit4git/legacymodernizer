@@ -1,0 +1,28 @@
+global:
+  namespace: {{artifactId}}-prod
+  imagePullPolicy: IfNotPresent
+
+api:
+  replicaCount: 3
+  # Pin to digest in prod — replace with your published digest
+  image:
+    tag: "@sha256:REPLACE_WITH_PINNED_DIGEST"
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:   { cpu: 2,    memory: 2Gi }
+  hpa:
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 65
+
+ui:
+  replicaCount: 3
+  image:
+    tag: "@sha256:REPLACE_WITH_PINNED_DIGEST"
+  hpa:
+    minReplicas: 3
+    maxReplicas: 12
+
+route:
+  api: { host: api.{{artifactId}}.example.com }
+  ui:  { host:     {{artifactId}}.example.com }

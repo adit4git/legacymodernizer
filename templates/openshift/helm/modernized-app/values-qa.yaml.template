@@ -1,0 +1,14 @@
+global:
+  namespace: {{artifactId}}-qa
+
+api:
+  replicaCount: 2
+  image: { tag: qa }
+
+ui:
+  replicaCount: 2
+  image: { tag: qa }
+
+route:
+  api: { host: api.qa.{{artifactId}}.example.com }
+  ui:  { host:     qa.{{artifactId}}.example.com }

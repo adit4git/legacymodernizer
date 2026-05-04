@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata: { name: maven-build }
+spec:
+  workspaces:
+    - { name: source }
+    - { name: cache }
+  steps:
+    - name: build
+      image: maven:3.9-eclipse-temurin-{{javaVersion}}
+      workingDir: $(workspaces.source.path)/api
+      env:
+        - { name: MAVEN_OPTS, value: "-Dmaven.repo.local=$(workspaces.cache.path)/.m2" }
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+        mvn -B verify

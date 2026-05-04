@@ -1,0 +1,8 @@
+apiVersion: v2
+name: {{artifactId}}
+description: Modernized application — Spring Boot API + SPA on OpenShift
+type: application
+version: 0.1.0
+appVersion: "{{version}}"
+maintainers:
+  - name: {{maintainer}}

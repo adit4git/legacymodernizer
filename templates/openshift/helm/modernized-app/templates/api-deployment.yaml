@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ "{{ .Release.Name }}-api" }}
+  labels:
+    app.kubernetes.io/name: {{ "{{ .Release.Name }}-api" }}
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: {{ "{{ .Chart.Name }}" }}
+spec:
+  replicas: {{ "{{ .Values.api.replicaCount }}" }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ "{{ .Release.Name }}-api" }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ "{{ .Release.Name }}-api" }}
+        app.kubernetes.io/component: api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: api
+          image: {{ "{{ .Values.global.imageRegistry }}/{{ .Values.global.namespace }}/{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}" }}
+          imagePullPolicy: {{ "{{ .Values.global.imagePullPolicy }}" }}
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom: {{ "{{- toYaml .Values.api.envFrom | nindent 12 }}" }}
+          env: {{ "{{- toYaml .Values.api.env | nindent 12 }}" }}
+          resources: {{ "{{- toYaml .Values.api.resources | nindent 12 }}" }}
+          livenessProbe:
+            httpGet:
+              path: {{ "{{ .Values.api.probes.liveness.path }}" }}
+              port: http
+            initialDelaySeconds: {{ "{{ .Values.api.probes.liveness.initialDelaySeconds }}" }}
+            periodSeconds: {{ "{{ .Values.api.probes.liveness.periodSeconds }}" }}
+          readinessProbe:
+            httpGet:
+              path: {{ "{{ .Values.api.probes.readiness.path }}" }}
+              port: http
+            initialDelaySeconds: {{ "{{ .Values.api.probes.readiness.initialDelaySeconds }}" }}
+            periodSeconds: {{ "{{ .Values.api.probes.readiness.periodSeconds }}" }}
+          startupProbe:
+            httpGet:
+              path: {{ "{{ .Values.api.probes.startup.path }}" }}
+              port: http
+            failureThreshold: {{ "{{ .Values.api.probes.startup.failureThreshold }}" }}
+            periodSeconds: {{ "{{ .Values.api.probes.startup.periodSeconds }}" }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }

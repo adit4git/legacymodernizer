@@ -1,0 +1,66 @@
+image: atlassian/default-image:4
+
+definitions:
+  caches:
+    maven-local: ~/.m2/repository
+    npm-cache: ~/.npm
+
+  steps:
+    - step: &api-build-test
+        name: API build & test
+        image: maven:3.9-eclipse-temurin-{{javaVersion}}
+        caches: [maven-local]
+        script:
+          - cd api
+          - mvn -B verify
+        artifacts:
+          - api/app/target/*.jar
+          - api/app/target/site/jacoco/**
+
+    - step: &ui-build-test
+        name: UI build & test
+        image: node:20
+        caches: [npm-cache, node]
+        script:
+          - cd ui
+          - npm ci
+          - npm run lint
+          - npm run test -- --coverage
+          - npm run build
+        artifacts:
+          - ui/dist/**
+
+    - step: &security-scan
+        name: Container security scan
+        image: aquasec/trivy:latest
+        script:
+          - trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+
+pipelines:
+  default:
+    - parallel:
+        - step: *api-build-test
+        - step: *ui-build-test
+    - step: *security-scan
+
+  pull-requests:
+    '**':
+      - parallel:
+          - step: *api-build-test
+          - step: *ui-build-test
+      - step: *security-scan
+
+  branches:
+    main:
+      - parallel:
+          - step: *api-build-test
+          - step: *ui-build-test
+      - step: *security-scan
+      - step:
+          name: Build & push images
+          services: [docker]
+          script:
+            - echo "Push image to OpenShift internal registry"
+            - oc login --token=$OC_TOKEN --server=$OC_SERVER
+            - oc start-build {{artifactId}}-api --from-dir=api --follow
+            - oc start-build {{artifactId}}-ui  --from-dir=ui  --follow

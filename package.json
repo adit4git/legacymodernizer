@@ -1,0 +1,303 @@
+{
+  "name": "legacy-modernizer",
+  "displayName": "Legacy .NET Modernizer (Agentic)",
+  "description": "Agentic tool to convert legacy .NET applications to Java Spring Boot APIs and React/Angular SPAs with human-in-the-loop gates, OpenShift CI/CD, unit test generation, and Jira/Bitbucket MCP integration.",
+  "version": "1.0.0",
+  "publisher": "modernization-tools",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "AI"
+  ],
+  "keywords": [
+    "modernization",
+    "dotnet",
+    "spring-boot",
+    "react",
+    "angular",
+    "agentic",
+    "claude",
+    "codex"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "legacyModernizer",
+          "title": "Legacy Modernizer",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "legacyModernizer": [
+        {
+          "id": "modernizerMenu",
+          "name": "Modernization Menu",
+          "type": "webview"
+        },
+        {
+          "id": "modernizerStatus",
+          "name": "Pipeline Status"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "modernizer.openMenu",
+        "title": "Modernizer: Open Menu",
+        "icon": "$(menu)"
+      },
+      {
+        "command": "modernizer.runFullPipeline",
+        "title": "Modernizer: Run Full Pipeline",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "modernizer.step1.analyze",
+        "title": "Modernizer: Step 1 - Analyze Legacy Codebase",
+        "icon": "$(search)"
+      },
+      {
+        "command": "modernizer.step2.generateDocs",
+        "title": "Modernizer: Step 2 - Generate Legacy Documentation (requires Step 1 Analyze)",
+        "icon": "$(book)"
+      },
+      {
+        "command": "modernizer.step3.reviewDocs",
+        "title": "Modernizer: Step 3 - Review Documentation [HUMAN GATE] (requires Step 2)",
+        "icon": "$(check)"
+      },
+      {
+        "command": "modernizer.step4.convertApi",
+        "title": "Modernizer: Step 4 - Convert .NET API to Spring Boot (requires Step 3 approval)",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "modernizer.step5.convertUi",
+        "title": "Modernizer: Step 5 - Convert ASP.NET WebForms to SPA (requires Step 3 approval)",
+        "icon": "$(browser)"
+      },
+      {
+        "command": "modernizer.step6.reviewCode",
+        "title": "Modernizer: Step 6 - Review Generated Code [HUMAN GATE] (requires Steps 4 and 5)",
+        "icon": "$(check)"
+      },
+      {
+        "command": "modernizer.step7.generateTests",
+        "title": "Modernizer: Step 7 - Generate Unit & Integration Tests (requires Step 6 approval)",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "modernizer.step8.generateCicd",
+        "title": "Modernizer: Step 8 - Generate OpenShift CI/CD Manifests (requires Step 7)",
+        "icon": "$(cloud)"
+      },
+      {
+        "command": "modernizer.step9.reviewCicd",
+        "title": "Modernizer: Step 9 - Review CI/CD Manifests [HUMAN GATE] (requires Step 8)",
+        "icon": "$(check)"
+      },
+      {
+        "command": "modernizer.defects.fetchJira",
+        "title": "Modernizer: Fetch Jira Defects (MCP)",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "modernizer.defects.resolve",
+        "title": "Modernizer: Resolve Defect & Open Bitbucket PR (MCP)",
+        "icon": "$(git-pull-request)"
+      },
+      {
+        "command": "modernizer.config.targetArchitecture",
+        "title": "Modernizer: Configure Target Architecture & Best Practices"
+      },
+      {
+        "command": "modernizer.config.modelProvider",
+        "title": "Modernizer: Configure Model Provider"
+      },
+      {
+        "command": "modernizer.loadSampleLegacy",
+        "title": "Modernizer: Load Sample Legacy .NET Codebase"
+      },
+      {
+  "command": "modernizer.listCopilotModels",
+  "title": "Modernizer: List Available Copilot Models"
+}
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "modernizer.openMenu",
+          "when": "view == modernizerMenu",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Legacy Modernizer",
+      "properties": {
+        "modernizer.modelProvider": {
+  "type": "string",
+  "enum": ["vscode-copilot", "claude-sonnet", "openai-codex"],
+  "enumDescriptions": [
+    "Use models available through your GitHub Copilot subscription via VS Code's Language Model API (cheapest for high-volume agent runs).",
+    "Call Anthropic's Claude API directly with your own key.",
+    "Call OpenAI's API directly with your own key."
+  ],
+  "default": "vscode-copilot",
+  "description": "Which LLM to use for agentic conversion."
+},
+	"modernizer.copilotModelFamily": {
+	  "type": "string",
+	  "default": "gpt-5 mini",
+	  "description": "Copilot model family to request via vscode.lm (e.g. gpt-4o, gpt-4.1, claude-sonnet-4.5, o1). Run 'Modernizer: List Available Copilot Models' to see what's installed."
+	},
+	"modernizer.modelFor": {
+	  "type": "object",
+	  "default": {},
+	  "additionalProperties": {
+	    "type": "string"
+	  },
+	  "description": "Optional per-step model overrides. Keys are step IDs (analyze, docs, convertApi, convertUi, tests, cicd, defectResolution). Values are '<provider>:<model>' such as 'copilot:gpt-4o-mini' or 'anthropic:claude-sonnet-4-6'."
+	},
+	        "modernizer.anthropicApiKey": {
+	          "type": "string",
+	          "default": "",
+	          "description": "Anthropic API key (Claude Sonnet)."
+	        },
+	        "modernizer.anthropicModel": {
+	          "type": "string",
+	          "default": "claude-sonnet-4-6",
+	          "description": "Anthropic model ID to use when modelProvider is claude-sonnet."
+	        },
+	        "modernizer.anthropicMaxTokens": {
+	          "type": "number",
+	          "default": 8192,
+	          "description": "max_tokens sent to Anthropic per request. Keep this high for multi-file code generation quality; throttling should come from delays/backoff."
+	        },
+	        "modernizer.anthropicRetryAttempts": {
+	          "type": "number",
+	          "default": 4,
+	          "description": "How many times to retry Anthropic requests on 429/529 before failing."
+	        },
+	        "modernizer.anthropicRetryBaseMs": {
+	          "type": "number",
+	          "default": 1500,
+	          "description": "Base backoff (ms) for Anthropic retry delay when retry-after is unavailable."
+	        },
+	        "modernizer.openaiApiKey": {
+	          "type": "string",
+	          "default": "",
+	          "description": "OpenAI API key (Codex / GPT)."
+	        },
+	        "modernizer.openaiModel": {
+	          "type": "string",
+	          "default": "gpt-4.1",
+	          "description": "OpenAI model ID to use when modelProvider is openai-codex."
+	        },
+	        "modernizer.legacyRoot": {
+	          "type": "string",
+	          "default": "",
+	          "description": "Absolute path to the legacy .NET codebase."
+        },
+        "modernizer.targetRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path where modernized output is written."
+        },
+        "modernizer.targetUiFramework": {
+          "type": "string",
+          "enum": ["react", "angular"],
+          "default": "react",
+          "description": "Target SPA framework (TypeScript)."
+        },
+        "modernizer.targetArchitectureFile": {
+          "type": "string",
+          "default": "",
+          "description": "Path to a markdown file describing target architecture & best practices."
+        },
+	        "modernizer.maxIterations": {
+	          "type": "number",
+	          "default": 40,
+	          "description": "Max self-correction iterations per agent."
+	        },
+	        "modernizer.historyTurns": {
+	          "type": "number",
+	          "default": 12,
+	          "description": "How many recent tool-use turns to retain in the LLM prompt window."
+	        },
+	        "modernizer.toolResultMaxChars": {
+	          "type": "number",
+	          "default": 30000,
+	          "description": "Maximum characters from each tool result to include in model context."
+	        },
+	        "modernizer.skillPromptMaxChars": {
+	          "type": "number",
+	          "default": 45000,
+	          "description": "Maximum SKILL.md characters injected into the system prompt."
+	        },
+	        "modernizer.archPromptMaxChars": {
+	          "type": "number",
+	          "default": 30000,
+	          "description": "Maximum target architecture markdown characters injected into the system prompt."
+	        },
+	        "modernizer.readFileDefaultMaxBytes": {
+	          "type": "number",
+	          "default": 100000,
+	          "description": "Default byte budget for read_file when max_bytes is not requested."
+	        },
+	        "modernizer.readFileHardMaxBytes": {
+	          "type": "number",
+	          "default": 250000,
+	          "description": "Absolute cap for read_file max_bytes regardless of agent request."
+	        },
+	        "modernizer.interRequestDelayMs": {
+	          "type": "number",
+	          "default": 1000,
+	          "description": "Optional delay between model requests. Use 1000-3000 to reduce rate-limit spikes."
+	        },
+	        "modernizer.enableCritiquePass": {
+	          "type": "boolean",
+	          "default": true,
+	          "description": "Run a post-generation critique pass after each writing step. Disable during cost-sensitive debugging to reduce model calls."
+	        },
+	        "modernizer.jira.mcpEndpoint": {
+	          "type": "string",
+	          "default": "",
+	          "description": "MCP server URL for Jira."
+        },
+        "modernizer.bitbucket.mcpEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "MCP server URL for Bitbucket."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "openai": "^4.55.0",
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "axios": "^1.6.0",
+    "glob": "^10.3.0"
+  }
+}

@@ -1,0 +1,58 @@
+global:
+  imageRegistry: image-registry.openshift-image-registry.svc:5000
+  namespace: {{artifactId}}
+  imagePullPolicy: IfNotPresent
+
+api:
+  replicaCount: 2
+  image:
+    repository: {{artifactId}}-api
+    tag: latest
+  service:
+    port: 8080
+  resources:
+    requests: { cpu: 200m, memory: 512Mi }
+    limits:   { cpu: 1,    memory: 1Gi }
+  probes:
+    liveness:  { path: /actuator/health/liveness,  initialDelaySeconds: 30, periodSeconds: 10 }
+    readiness: { path: /actuator/health/readiness, initialDelaySeconds: 10, periodSeconds: 5 }
+    startup:   { path: /actuator/health/liveness,  failureThreshold: 30,    periodSeconds: 5 }
+  env: []
+  envFrom:
+    - secretRef:    { name: {{artifactId}}-api-secret }
+    - configMapRef: { name: {{artifactId}}-api-config }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+ui:
+  replicaCount: 2
+  image:
+    repository: {{artifactId}}-ui
+    tag: latest
+  service:
+    port: 8080
+  resources:
+    requests: { cpu: 50m,  memory: 64Mi }
+    limits:   { cpu: 200m, memory: 128Mi }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+
+route:
+  api: { host: api.{{artifactId}}.example.com, tls: { termination: edge, insecureEdgeTerminationPolicy: Redirect } }
+  ui:  { host:     {{artifactId}}.example.com, tls: { termination: edge, insecureEdgeTerminationPolicy: Redirect } }
+
+networkPolicy:
+  enabled: true
+  allowFromIngress: true
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+    path: /actuator/prometheus
+    port: 8080

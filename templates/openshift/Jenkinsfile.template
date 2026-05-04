@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+    }
+    environment {
+        IMAGE_REGISTRY = 'image-registry.openshift-image-registry.svc:5000'
+        APP_NAME       = '{{artifactId}}'
+    }
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+        stage('Build & Test') {
+            parallel {
+                stage('API') {
+                    agent { docker { image 'maven:3.9-eclipse-temurin-{{javaVersion}}' } }
+                    steps {
+                        dir('api') { sh 'mvn -B verify' }
+                        junit 'api/app/target/surefire-reports/*.xml'
+                        publishHTML([reportDir: 'api/app/target/site/jacoco', reportFiles: 'index.html', reportName: 'JaCoCo'])
+                    }
+                }
+                stage('UI') {
+                    agent { docker { image 'node:20-alpine' } }
+                    steps {
+                        dir('ui') {
+                            sh 'npm ci'
+                            sh 'npm run lint'
+                            sh 'npm run test'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Container Scan') {
+            agent { docker { image 'aquasec/trivy:latest' } }
+            steps { sh 'trivy fs --severity HIGH,CRITICAL --exit-code 1 .' }
+        }
+        stage('Image & Deploy') {
+            when { branch 'main' }
+            steps {
+                sh """
+                    oc start-build ${APP_NAME}-api --from-dir=api --follow
+                    oc start-build ${APP_NAME}-ui  --from-dir=ui  --follow
+                    helm upgrade --install ${APP_NAME} deploy/helm/modernized-app
+                """
+            }
+        }
+    }
+    post {
+        always { archiveArtifacts artifacts: 'api/app/target/*.jar, ui/dist/**', allowEmptyArchive: true }
+    }
+}

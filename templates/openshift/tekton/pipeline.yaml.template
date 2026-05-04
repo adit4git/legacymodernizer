@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: {{artifactId}}-pipeline
+spec:
+  params:
+    - { name: git-url, type: string }
+    - { name: git-revision, type: string, default: main }
+    - { name: image-tag, type: string, default: latest }
+  workspaces:
+    - { name: source }
+    - { name: maven-cache }
+    - { name: npm-cache }
+  tasks:
+    - name: clone
+      taskRef: { name: git-clone, kind: ClusterTask }
+      params:
+        - { name: url,      value: $(params.git-url) }
+        - { name: revision, value: $(params.git-revision) }
+      workspaces:
+        - { name: output, workspace: source }
+
+    - name: build-api
+      runAfter: [clone]
+      taskRef: { name: maven-build }
+      workspaces:
+        - { name: source, workspace: source }
+        - { name: cache,  workspace: maven-cache }
+
+    - name: build-ui
+      runAfter: [clone]
+      taskRef: { name: npm-build }
+      workspaces:
+        - { name: source, workspace: source }
+        - { name: cache,  workspace: npm-cache }
+
+    - name: image-api
+      runAfter: [build-api]
+      taskRef: { name: buildah, kind: ClusterTask }
+      params:
+        - { name: IMAGE, value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/{{artifactId}}-api:$(params.image-tag) }
+        - { name: DOCKERFILE, value: deploy/docker/Dockerfile.api }
+        - { name: CONTEXT,    value: api }
+      workspaces:
+        - { name: source, workspace: source }
+
+    - name: image-ui
+      runAfter: [build-ui]
+      taskRef: { name: buildah, kind: ClusterTask }
+      params:
+        - { name: IMAGE, value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/{{artifactId}}-ui:$(params.image-tag) }
+        - { name: DOCKERFILE, value: deploy/docker/Dockerfile.ui }
+        - { name: CONTEXT,    value: ui }
+      workspaces:
+        - { name: source, workspace: source }
+
+    - name: deploy
+      runAfter: [image-api, image-ui]
+      taskRef: { name: oc-deploy }
+      params:
+        - { name: chart-path, value: deploy/helm/modernized-app }
+        - { name: release,    value: {{artifactId}} }

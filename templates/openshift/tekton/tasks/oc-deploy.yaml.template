@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata: { name: oc-deploy }
+spec:
+  params:
+    - { name: chart-path, type: string }
+    - { name: release,    type: string }
+    - { name: namespace,  type: string, default: "" }
+  workspaces:
+    - { name: source }
+  steps:
+    - name: helm-upgrade
+      image: alpine/helm:3.16.3
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/usr/bin/env sh
+        set -e
+        NS="$(params.namespace)"
+        if [ -z "$NS" ]; then NS="$(context.taskRun.namespace)"; fi
+        helm upgrade --install $(params.release) $(params.chart-path) \
+          --namespace "$NS" --create-namespace --wait --timeout 5m
